@@ -11,6 +11,9 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+import pandas.io.sql as sqlio
+import psycopg2
+import sqlalchemy
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -103,6 +106,7 @@ data_total = pd.concat([data_1,data_2,data_3])
 
 data_total.Created = pd.to_datetime(data_total.Created,format='%Y-%m-%d %H:%M:%S %Z')
 data_total['Video Length'] = pd.to_timedelta(data_total['Video Length'])
+data_total = data_total.rename({'Overperforming Score (weighted  —  Likes 1x Shares 1x Comments 1x Love 1x Wow 1x Haha 1x Sad 1x Angry 1x Care 1x )' : 'Overperforming Score'},axis=1)
 
 data_total_ordered = data_total.sort_values(by=['URL','File'])
 
@@ -117,3 +121,15 @@ data_userid = data_total_updated[['Page Name','User Name','Facebook Id']]
 data_userid = data_userid.drop_duplicates()
 
 data_url = data_total_updated.drop(labels=['Page Name','User Name','File'],axis=1)
+
+
+db_connection_file = open('db.pickle','rb')
+db_connection_data = pickle.load(db_connection_file)
+db_connection_file.close()
+
+engine = sqlalchemy.create_engine(db_connection_data)
+
+print("Sending data to userid table")
+data_userid.to_sql('userid',engine,if_exists='replace')
+print("Sending data to urldata table")
+data_url.to_sql('urldata',engine,if_exists='replace')
