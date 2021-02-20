@@ -89,3 +89,31 @@ service.close()
 data_1 = pd.read_csv('2021-02-06-03-04-06-CET-Historical-Report-GUSFacebook-2020-11-06--2021-02-06.csv')
 data_2 = pd.read_csv('2021-02-07-03-02-27-CET-Historical-Report-GUSFacebook-2020-11-07--2021-02-07.csv')
 data_3 = pd.read_csv('2021-02-08-03-02-18-CET-Historical-Report-GUSFacebook-2020-11-08--2021-02-08.csv')
+
+# There is a large overlap between dates. This means that we get daily updates
+# of the likes, shares and so on of our data. We need to be sure that we are using
+# the last data available. For this reason, we are going to consider only the data
+# from the latest dataset available.
+
+data_1['File'] = 1
+data_2['File'] = 2
+data_3['File'] = 3
+
+data_total = pd.concat([data_1,data_2,data_3])
+
+data_total.Created = pd.to_datetime(data_total.Created,format='%Y-%m-%d %H:%M:%S %Z')
+data_total['Video Length'] = pd.to_timedelta(data_total['Video Length'])
+
+data_total_ordered = data_total.sort_values(by=['URL','File'])
+
+# We just check the last value available (because it is the most actual)
+
+data_total_updated = data_total_ordered.groupby('URL').tail(n=1)
+
+
+# "Normalize" the "database"
+
+data_userid = data_total_updated[['Page Name','User Name','Facebook Id']]
+data_userid = data_userid.drop_duplicates()
+
+data_url = data_total_updated.drop(labels=['Page Name','User Name','File'],axis=1)
