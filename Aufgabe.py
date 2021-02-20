@@ -84,3 +84,8 @@ for i_message in range(len(report_messages['messages'])):
     GetAttachments(service, 'me', message_id)
 
 service.close()
+
+
+data_1 = pd.read_csv('2021-02-06-03-04-06-CET-Historical-Report-GUSFacebook-2020-11-06--2021-02-06.csv')
+data_2 = pd.read_csv('2021-02-07-03-02-27-CET-Historical-Report-GUSFacebook-2020-11-07--2021-02-07.csv')
+data_3 = pd.read_csv('2021-02-08-03-02-18-CET-Historical-Report-GUSFacebook-2020-11-08--2021-02-08.csv')
